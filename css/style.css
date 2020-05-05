@@ -2,13 +2,19 @@ body{
     background: #42275a;  
     background: -webkit-linear-gradient(to right, #734b6d, #42275a); 
     background: linear-gradient(to right, #734b6d, #42275a);
-    font-size: 16px;
+    font-size: 14px;
 }
 
 h1{
     border-bottom: 1px solid rgba(54, 0, 104, 0.2);
     font-family: 'Patrick Hand', cursive;
     text-align: center;
+}
+
+.balance{
+    display: flex;
+    justify-content: space-around;
+    border-bottom: 0.5px solid rgba(0,0,0,0.2);
 }
 
 .container{
@@ -19,20 +25,26 @@ h1{
     display: flex;
     flex-direction: column;
     margin: 1rem;
+    width: 80%;
 }
 
 .subcontainer{
     display: flex;
+    width: 100%;
 }
 
 .balance p{
-    font-size: 1.5rem;
+    border-radius: 5px;
+    color: white;
+    font-size: 1.3rem;
+    padding: 0.3rem;
 }
 
 .item{
     background-color: #42275a;
     border-radius: 6px;
     color: white;
+    display: flex;
     margin: 0.5rem;
     list-style: none;
     padding: 0.5rem;
@@ -41,6 +53,50 @@ h1{
 .delete{
     background-color: rgb(179, 0, 0);
     border-radius: 30%;
+    cursor: pointer;
+    height: 50%;
     margin-left: 1rem;
     padding: 2px 5px;
+}
+
+.side1{
+    border-right: 0.5px solid rgba(0,0,0,0.2);
+    padding-right: 1rem;
+    width: 40%;
+}
+
+.itemList{
+    width: 60%;
+}
+
+.data{
+    width: 80%;
+}
+
+#message{
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.message{
+    background-color: rgb(131, 0, 0);
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    padding: 0.2rem;
+    width: 50%;
+}
+
+#total{
+    background-color: rgb(24, 189, 3);
+}
+
+#entrance{
+    background-color: rgb(0, 171, 238);
+}
+
+#expense{
+    background-color: rgb(155, 0, 8);
 }

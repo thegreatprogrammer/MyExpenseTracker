@@ -21,25 +21,33 @@
         <div class="title">
             <h1>My Expense Tracker</h1>
         </div>
+        
+        <div class="balance">
+            <p id="total">Total: <span id="totalAmount">0.00</span></p>
+            <p id="expense">Expense: <span id="totalExpense">0.00</span></p>
+            <p id="entrance">Entrance: <span id="totalEntrance">0.00</span></p>
+        </div>
 
         <div class="subcontainer">
             <div class="side1">
-                <div class="balance">
-                    <p>Total: <span id="totalAmount">0.00</span></p>
-                    <p>Expense: <span id="totalExpense">0.00</span></p>
-                    <p>Entrance: <span id="totalEntrance">0.00</span></p>
-                </div>
-                
                 <div class="addExpense">
-                    <form class="add form-group">
+                    <form id="form" class="add form-group">
     
                         <label for="description">Description</label>
                         <input id="description" class="form-control" type="text" placeholder="Write a description about">
-    
+                        <br>
+
                         <label for="amount">Amount</label>
                         <input id="amount" class="form-control" type="number">
+                        <br>
+
+                        <select name="" id="category" class="form-control" required>
+                            <option value="" disabled>Select category</option>
+                            <option value="entrance">Entrance</option>
+                            <option value="expense">Expense</option>
+                        </select>
     
-                        <button id="send" class="btn btn-primary btn-block mt-4">Send</button>
+                        <input type="submit" id="send" value="Send" class="btn btn-primary btn-block mt-4">
                     </form>
                 </div>
             </div>
@@ -49,6 +57,9 @@
                     
                 </ul>
             </div>
+        </div>
+
+        <div id="message">
         </div>
     </div>
 
