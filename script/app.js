@@ -1,3 +1,5 @@
+// VARIABLES
+
 // Inputs
 let description = document.getElementById('description');
 let amount = document.getElementById('amount');
@@ -8,9 +10,65 @@ let list = document.getElementById('list');
 
 // Amounts
 let total = 0;
-let expense = 0;
-let entrance = 0;
+
 category.value = '';
+
+//////////////////////////     FUNCTIONS    ////////////////////////////////
+
+// Init function
+const init = amount =>{
+    let total = document.getElementById('totalAmount');
+    let storage;
+
+    // Valor inicial del total en local storage
+    if(localStorage.getItem('total') === null){
+
+        if(amount){
+            total.innerHTML = amount;
+            localStorage.setItem('total', JSON.stringify(amount));
+            
+        } else{
+            total.innerHTML = '0.00';
+            localStorage.setItem('total', '0');
+        }
+
+    } else{
+
+        storage = Number(localStorage.getItem('total'));
+
+        if(getTotalAmount('entrance') != null){
+            storage += getTotalAmount('entrance');
+        }
+
+        if(getTotalAmount('expense') != null){
+            storage -= getTotalAmount('expense');
+        }
+
+        localStorage.setItem('total', JSON.stringify(storage));
+
+        total.innerHTML = storage;
+
+    }
+}
+
+// MAIN FUNCTION. Based in category selected, each action will be executed
+
+const App = (category, amount) =>{
+
+    if(category === 'entrance'){
+
+        updateEntranceStorage(amount);
+    } 
+    
+    else{
+
+        updateExpenseStorage(amount);
+
+    }
+
+}
+
+/////////////////////////    UI FUNCTIONS    ///////////////////////////////
 
 // Add item to UI
 const updateUI = (desc, amount, category) =>{
@@ -62,45 +120,7 @@ const deleteItem = e =>{
 }
 
 // Update Amounts UI
-const updateTracker = (cat, value, amount) =>{
 
-    let totalDiv = document.getElementById('totalAmount');
-
-    if(cat === 'entrance'){
-        let entrance = document.getElementById('totalEntrance');
-        entrance.innerText = `+${value}`;
-
-        total += amount;
-        totalDiv.innerText = total;
-        
-    } else{
-        let expense = document.getElementById('totalExpense');
-        expense.innerText = `-${value}`;
-
-        total -= amount;
-        totalDiv.innerText = total;
-    }
-}
-
-// Based in category selected, each action will be executed
-const myApp = selected =>{
-    if(selected === 'entrance'){
-        entrance += Number(amount.value);
-        updateUI(description.value, amount.value, selected);
-        updateTracker(selected, entrance, Number(amount.value));
-    }
-    
-    if(selected === 'expense'){
-        if(amount.value < total){
-            expense += Number(amount.value);
-            updateUI(description.value, amount.value, selected);
-            updateTracker(selected, expense,Number(amount.value));
-
-        } else {
-            buildMessage('Low budget! Sorry');
-        }
-    }
-}
 
 // Show a message when something is wrong
 const buildMessage = text =>{
@@ -113,18 +133,98 @@ const buildMessage = text =>{
     setTimeout(() => message.innerHTML = '', 3000);
 }
 
-// Add Local Storage
+/////////////////////    LOCAL STORAGE FUNCTIONS    ////////////////////////
+
+const updateEntranceStorage = amount =>{
+
+    if(localStorage.getItem('entrance') === null){
+
+        let arrEntrance = [];
+
+        arrEntrance.push(amount);
+
+        localStorage.setItem('entrance', JSON.stringify(arrEntrance));
+
+        totalEntrance.innerText = amount;
+
+    } else{
+        let entrance = JSON.parse(localStorage.getItem('entrance'));
+
+        entrance.push(amount);
+
+        localStorage.setItem('entrance', JSON.stringify(entrance));
+        
+        totalEntrance.innerText = getTotalAmount('entrance');
+    }
+
+    if(localStorage.getItem('expense') !== null){
+        total.innerText = getTotalAmount('entrance') - getTotalAmount('expense');
+
+    } else{
+        total.innerText = getTotalAmount('entrance');
+    }
+}
+
+const updateExpenseStorage = amount =>{
+    if(amount < Number(getTotalAmount('entrance'))){
+        if(localStorage.getItem('expense') === null){
+
+            let arrExpense = [];
+
+            arrExpense.push(amount);
+
+            localStorage.setItem('expense', JSON.stringify(arrExpense));
+
+            totalExpense.innerText = amount;
+
+        } else{
+            let expense = JSON.parse(localStorage.getItem('expense'));
+
+            expense.push(amount);
+
+            localStorage.setItem('expense', JSON.stringify(expense));
+
+            totalExpense.innerText = getTotalAmount('expense');
+        }
+
+        total.innerText = getTotalAmount('entrance') - getTotalAmount('expense');
+
+    } else{
+        buildMessage('Low Budget!');
+    }
+}
+
+const getTotalAmount = category =>{
+
+    const entrance = JSON.parse(localStorage.getItem(category));
+
+    if(entrance){
+        const total = entrance.reduce( (a, b) => Number(a) + Number(b));
+    
+        return Number(total);
+        
+    } else{
+        return 0;
+    }
+}
 
 // Event listeners
+
+document.addEventListener('DOMContentLoaded', e =>{
+    init();
+})
 
 form.addEventListener('submit', e =>{
     e.preventDefault();
 
+    
     let selected = category.options[category.selectedIndex].value;
-
+    
     if(description.value != '' && amount.value != ''){
+        
+        init(amount.value);
 
-        myApp(selected);
+        App(selected, amount.value);
 
         description.value = "";
         amount.value = "";
@@ -138,6 +238,9 @@ form.addEventListener('submit', e =>{
 
 list.addEventListener('click', e =>{
     if(e.target.classList.contains('delete')){
+
         deleteItem(e.target);
+
+        // Delete in LocalStorage
     }
 });
