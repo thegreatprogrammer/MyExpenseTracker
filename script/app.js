@@ -19,7 +19,10 @@ category.value = '';
 
 // Init function
 const init = (category, amount) =>{
+
     let total = document.getElementById('totalAmount');
+    let expense = document.getElementById('totalExpense');
+    let entrance = document.getElementById('totalEntrance');
     let storage;
 
     // Valor inicial del total en local storage
@@ -44,20 +47,45 @@ const init = (category, amount) =>{
         localStorage.setItem('total', JSON.stringify(storage));
 
     }
+
+    // Valores de expense y entrance, sacados de local Storage
+
+    if(localStorage.getItem('entrance') === null){
+
+        entrance.innerHTML = '0.00';
+
+    } else{
+
+        entrance.innerHTML = getTotalAmount('entrance');
+
+    }
+
+    ////
+
+    if(localStorage.getItem('expense') === null){
+
+        expense.innerHTML = '0.00';
+
+    } else{
+
+        expense.innerHTML = getTotalAmount('expense');
+
+    }
 }
 
 // MAIN FUNCTION. Based in category selected, each action will be executed
 
-const App = (category, amount) =>{
+const App = (description, amount, selected) =>{
 
-    if(category === 'entrance'){
+    if(selected === 'entrance'){
 
-        updateEntranceStorage(amount);
+        updateEntranceStorage(description, amount, selected);
+
     } 
     
     else{
 
-        updateExpenseStorage(amount);
+        updateExpenseStorage(description, amount, selected);
 
     }
 
@@ -70,22 +98,25 @@ const updateUI = (desc, amount, category) =>{
 
     if(category === 'entrance'){
         list.innerHTML += `
-            <li class="item entrance">
+            <li class="item entrance" id="entrance">
                 <div class="data">
                     ${desc}. Total: +<span id="ent">${amount}</span>
                 </div>
                 <span class="delete">x</span>
             </li>
         `
+        console.log('nueva entrada');
+        
     } else{
         list.innerHTML += `
-            <li class="item expense">
+            <li class="item expense" id="expense">
                 <div class="data">
                     ${desc}. Total: -<span id="exp">${amount}</span>
                 </div>
                 <span class="delete">x</span>
             </li>
         `
+        console.log('nueva entrada');
     }
 }
 
@@ -114,8 +145,6 @@ const deleteItem = e =>{
     e.parentElement.remove();
 }
 
-// Update Amounts UI
-
 
 // Show a message when something is wrong
 const buildMessage = text =>{
@@ -130,7 +159,7 @@ const buildMessage = text =>{
 
 /////////////////////    LOCAL STORAGE FUNCTIONS    ////////////////////////
 
-const updateEntranceStorage = amount =>{
+const updateEntranceStorage = (description, amount, selected) =>{
 
     if(localStorage.getItem('entrance') === null){
 
@@ -142,6 +171,9 @@ const updateEntranceStorage = amount =>{
 
         totalEntrance.innerText = amount;
 
+        updateUI(description, amount, selected);
+
+
     } else{
         let entrance = JSON.parse(localStorage.getItem('entrance'));
 
@@ -150,11 +182,14 @@ const updateEntranceStorage = amount =>{
         localStorage.setItem('entrance', JSON.stringify(entrance));
         
         totalEntrance.innerText = getTotalAmount('entrance');
+
+        updateUI(description, amount, selected);
+
     }
 
 }
 
-const updateExpenseStorage = amount =>{
+const updateExpenseStorage = (description, amount, selected) =>{
     if(amount < Number(getTotalAmount('entrance'))){
         if(localStorage.getItem('expense') === null){
 
@@ -166,6 +201,8 @@ const updateExpenseStorage = amount =>{
 
             totalExpense.innerText = amount;
 
+            updateUI(description, amount, selected);
+
         } else{
             let expense = JSON.parse(localStorage.getItem('expense'));
 
@@ -174,6 +211,9 @@ const updateExpenseStorage = amount =>{
             localStorage.setItem('expense', JSON.stringify(expense));
 
             totalExpense.innerText = getTotalAmount('expense');
+
+            updateUI(description, amount, selected);
+
         }
 
     } else{
@@ -208,7 +248,7 @@ form.addEventListener('submit', e =>{
     
     if(description.value != '' && amount.value != ''){
         
-        App(selected, amount.value);
+        App(description.value, amount.value, selected);
 
         init(selected, amount.value);
         

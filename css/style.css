@@ -52,6 +52,7 @@ h1{
 
 .delete{
     background-color: rgb(179, 0, 0);
+    border: 2px solid white;
     border-radius: 30%;
     cursor: pointer;
     height: 50%;
