@@ -1,3 +1,5 @@
+// Pending: reactivate the list update, and solving the bug of expense
+
 // VARIABLES
 
 // Inputs
@@ -16,37 +18,30 @@ category.value = '';
 //////////////////////////     FUNCTIONS    ////////////////////////////////
 
 // Init function
-const init = amount =>{
+const init = (category, amount) =>{
     let total = document.getElementById('totalAmount');
     let storage;
 
     // Valor inicial del total en local storage
     if(localStorage.getItem('total') === null){
 
-        if(amount){
-            total.innerHTML = amount;
-            localStorage.setItem('total', JSON.stringify(amount));
-            
-        } else{
-            total.innerHTML = '0.00';
-            localStorage.setItem('total', '0');
-        }
+        total.innerHTML = '0.00';
+        localStorage.setItem('total', '0');
 
     } else{
 
         storage = Number(localStorage.getItem('total'));
-
-        if(getTotalAmount('entrance') != null){
-            storage += getTotalAmount('entrance');
+        
+        if(category === 'entrance'){
+            storage += Number(amount);
         }
 
-        if(getTotalAmount('expense') != null){
-            storage -= getTotalAmount('expense');
+        if(category === 'expense'){
+            storage -= Number(amount);
         }
-
-        localStorage.setItem('total', JSON.stringify(storage));
-
+        
         total.innerHTML = storage;
+        localStorage.setItem('total', JSON.stringify(storage));
 
     }
 }
@@ -157,12 +152,6 @@ const updateEntranceStorage = amount =>{
         totalEntrance.innerText = getTotalAmount('entrance');
     }
 
-    if(localStorage.getItem('expense') !== null){
-        total.innerText = getTotalAmount('entrance') - getTotalAmount('expense');
-
-    } else{
-        total.innerText = getTotalAmount('entrance');
-    }
 }
 
 const updateExpenseStorage = amount =>{
@@ -186,8 +175,6 @@ const updateExpenseStorage = amount =>{
 
             totalExpense.innerText = getTotalAmount('expense');
         }
-
-        total.innerText = getTotalAmount('entrance') - getTotalAmount('expense');
 
     } else{
         buildMessage('Low Budget!');
@@ -216,16 +203,15 @@ document.addEventListener('DOMContentLoaded', e =>{
 
 form.addEventListener('submit', e =>{
     e.preventDefault();
-
     
     let selected = category.options[category.selectedIndex].value;
     
     if(description.value != '' && amount.value != ''){
         
-        init(amount.value);
-
         App(selected, amount.value);
 
+        init(selected, amount.value);
+        
         description.value = "";
         amount.value = "";
     } 
