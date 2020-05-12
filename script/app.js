@@ -9,6 +9,7 @@ let form = document.getElementById('form');
 let category = document.getElementById('category');
 
 let list = document.getElementById('list');
+let arrList = [];
 
 // Amounts
 let total = 0;
@@ -17,107 +18,52 @@ category.value = '';
 
 //////////////////////////     FUNCTIONS    ////////////////////////////////
 
-// Init function
-const init = (category, amount) =>{
-
-    let total = document.getElementById('totalAmount');
-    let expense = document.getElementById('totalExpense');
-    let entrance = document.getElementById('totalEntrance');
-    let storage;
-
-    // Valor inicial del total en local storage
-    if(localStorage.getItem('total') === null){
-
-        total.innerHTML = '0.00';
-        localStorage.setItem('total', '0');
-
-    } else{
-
-        storage = Number(localStorage.getItem('total'));
-        
-        if(category === 'entrance'){
-            storage += Number(amount);
-        }
-
-        if(category === 'expense'){
-            storage -= Number(amount);
-        }
-        
-        total.innerHTML = storage;
-        localStorage.setItem('total', JSON.stringify(storage));
-
-    }
-
-    // Valores de expense y entrance, sacados de local Storage
-
-    if(localStorage.getItem('entrance') === null){
-
-        entrance.innerHTML = '0.00';
-
-    } else{
-
-        entrance.innerHTML = getTotalAmount('entrance');
-
-    }
-
-    ////
-
-    if(localStorage.getItem('expense') === null){
-
-        expense.innerHTML = '0.00';
-
-    } else{
-
-        expense.innerHTML = getTotalAmount('expense');
-
-    }
-}
-
-// MAIN FUNCTION. Based in category selected, each action will be executed
-
-const App = (description, amount, selected) =>{
-
-    if(selected === 'entrance'){
-
-        updateEntranceStorage(description, amount, selected);
-
-    } 
-    
-    else{
-
-        updateExpenseStorage(description, amount, selected);
-
-    }
-
-}
 
 /////////////////////////    UI FUNCTIONS    ///////////////////////////////
 
 // Add item to UI
 const updateUI = (desc, amount, category) =>{
 
+    let object;
+
     if(category === 'entrance'){
-        list.innerHTML += `
-            <li class="item entrance" id="entrance">
-                <div class="data">
-                    ${desc}. Total: +<span id="ent">${amount}</span>
-                </div>
-                <span class="delete">x</span>
-            </li>
+        let item = `
+        <li class="item entrance" id="entrance">
+            <div class="data">
+                ${desc}. Total: +<span id="ent">${amount}</span>
+            </div>
+            <span class="delete">x</span>
+        </li>
         `
-        console.log('nueva entrada');
-        
+        list.innerHTML += item;
+
+        object = {
+            description: desc,
+            amount: amount
+        }
+
+        arrList.push(object);
+
     } else{
-        list.innerHTML += `
-            <li class="item expense" id="expense">
-                <div class="data">
-                    ${desc}. Total: -<span id="exp">${amount}</span>
-                </div>
-                <span class="delete">x</span>
-            </li>
+        let item = `
+        <li class="item expense" id="expense">
+            <div class="data">
+                ${desc}. Total: -<span id="exp">${amount}</span>
+            </div>
+            <span class="delete">x</span>
+        </li>
         `
-        console.log('nueva entrada');
+        list.innerHTML += item;
+
+        object = {
+            description: desc,
+            amount: amount
+        }
+
+        arrList.push(object);
     }
+
+    checkStorage();
 }
 
 // Delete the selectioned item
@@ -157,88 +103,80 @@ const buildMessage = text =>{
     setTimeout(() => message.innerHTML = '', 3000);
 }
 
-/////////////////////    LOCAL STORAGE FUNCTIONS    ////////////////////////
+const setTotal = (amount, selected) =>{
 
-const updateEntranceStorage = (description, amount, selected) =>{
+    let data;
 
-    if(localStorage.getItem('entrance') === null){
-
-        let arrEntrance = [];
-
-        arrEntrance.push(amount);
-
-        localStorage.setItem('entrance', JSON.stringify(arrEntrance));
-
-        totalEntrance.innerText = amount;
-
-        updateUI(description, amount, selected);
-
+    if(localStorage.setItem('total') === null){
+        data = 0;
+        localStorage.setItem('total', data);
 
     } else{
-        let entrance = JSON.parse(localStorage.getItem('entrance'));
 
-        entrance.push(amount);
+        // If amount exists...
+        if(amount){
 
-        localStorage.setItem('entrance', JSON.stringify(entrance));
-        
-        totalEntrance.innerText = getTotalAmount('entrance');
+            if(selected === 'entrance'){
+                data = Number(localStorage.getItem('total'));
+                data += amount;
+                localStorage.setItem('total', data);
 
-        updateUI(description, amount, selected);
-
-    }
-
-}
-
-const updateExpenseStorage = (description, amount, selected) =>{
-    if(amount < Number(getTotalAmount('entrance'))){
-        if(localStorage.getItem('expense') === null){
-
-            let arrExpense = [];
-
-            arrExpense.push(amount);
-
-            localStorage.setItem('expense', JSON.stringify(arrExpense));
-
-            totalExpense.innerText = amount;
-
-            updateUI(description, amount, selected);
+            } else {
+                data = Number(localStorage.getItem('total'));
+                data -= amount;
+                localStorage.setItem('total', data);
+            }
 
         } else{
-            let expense = JSON.parse(localStorage.getItem('expense'));
+            return Number(localStorage.getItem('total'));
+        }
+    }
+}
 
-            expense.push(amount);
+const pushLocalStorage = (amount, selected) =>{
 
-            localStorage.setItem('expense', JSON.stringify(expense));
+    let data;
 
-            totalExpense.innerText = getTotalAmount('expense');
+    if(selected === 'entrance'){
 
-            updateUI(description, amount, selected);
+        if(localStorage.getItem('entrance') === null){
+            data = 0;
+
+            localStorage.setItem('entrance', JSON.stringify(data));
+            document.getElementById('totalEntrance').innerHTML = '0.00';
+
+        } else{
+            data = Number(localStorage.getItem('entrance'));
+            data += amount;
+
+            localStorage.setItem('entrance', JSON.stringify(data));
+            document.getElementById('totalEntrance').innerHTML = data;
 
         }
 
     } else{
-        buildMessage('Low Budget!');
-    }
-}
 
-const getTotalAmount = category =>{
+        if(localStorage.getItem('expense') === null){
+            data = 0;
 
-    const entrance = JSON.parse(localStorage.getItem(category));
+            localStorage.setItem('expense', JSON.stringify(data));
+            document.getElementById('totalExpense').innerHTML = '0.00';
 
-    if(entrance){
-        const total = entrance.reduce( (a, b) => Number(a) + Number(b));
-    
-        return Number(total);
-        
-    } else{
-        return 0;
+        } else{
+            data = Number(localStorage.getItem('expense'));
+            data += amount;
+
+            localStorage.setItem('expense', JSON.stringify(data));
+            document.getElementById('totalExpense').innerHTML = data;
+
+        }
     }
 }
 
 // Event listeners
 
 document.addEventListener('DOMContentLoaded', e =>{
-    init();
+    setTotal();
 })
 
 form.addEventListener('submit', e =>{
@@ -248,10 +186,14 @@ form.addEventListener('submit', e =>{
     
     if(description.value != '' && amount.value != ''){
         
-        App(description.value, amount.value, selected);
-
-        init(selected, amount.value);
+        // Push to LocalStorage
+        pushLocalStorage(amount, selected)
         
+        // Draw List
+        updateUI(description.value, amount.value, selected);
+        
+        // Compute total
+        setTotal(amount, selected);
         description.value = "";
         amount.value = "";
     } 
