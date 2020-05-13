@@ -13,6 +13,9 @@ let arrList = [];
 
 // Amounts
 let total = 0;
+document.getElementById('totalEntrance').innerHTML = '0.00';
+document.getElementById('totalExpense').innerHTML = '0.00';
+
 
 category.value = '';
 
@@ -37,13 +40,6 @@ const updateUI = (desc, amount, category) =>{
         `
         list.innerHTML += item;
 
-        object = {
-            description: desc,
-            amount: amount
-        }
-
-        arrList.push(object);
-
     } else{
         let item = `
         <li class="item expense" id="expense">
@@ -55,15 +51,8 @@ const updateUI = (desc, amount, category) =>{
         `
         list.innerHTML += item;
 
-        object = {
-            description: desc,
-            amount: amount
-        }
-
-        arrList.push(object);
     }
 
-    checkStorage();
 }
 
 // Delete the selectioned item
@@ -107,9 +96,10 @@ const setTotal = (amount, selected) =>{
 
     let data;
 
-    if(localStorage.setItem('total') === null){
+    if(localStorage.getItem('total') === null){
         data = 0;
         localStorage.setItem('total', data);
+        document.getElementById('totalAmount').innerText = '0.00';
 
     } else{
 
@@ -119,16 +109,20 @@ const setTotal = (amount, selected) =>{
             if(selected === 'entrance'){
                 data = Number(localStorage.getItem('total'));
                 data += amount;
-                localStorage.setItem('total', data);
+                console.log(data)
+                localStorage.setItem('total', JSON.stringify(data));
+                document.getElementById('totalAmount').innerText = data;
 
             } else {
                 data = Number(localStorage.getItem('total'));
                 data -= amount;
-                localStorage.setItem('total', data);
+                localStorage.setItem('total', JSON.stringify(data));
+                document.getElementById('totalAmount').innerText = data;
+
             }
 
         } else{
-            return Number(localStorage.getItem('total'));
+            document.getElementById('totalAmount').innerText = Number(localStorage.getItem('total'));
         }
     }
 }
@@ -140,34 +134,37 @@ const pushLocalStorage = (amount, selected) =>{
     if(selected === 'entrance'){
 
         if(localStorage.getItem('entrance') === null){
-            data = 0;
 
-            localStorage.setItem('entrance', JSON.stringify(data));
-            document.getElementById('totalEntrance').innerHTML = '0.00';
+            localStorage.setItem('entrance', JSON.stringify(amount));
+            document.getElementById('totalEntrance').innerText = amount;
 
         } else{
             data = Number(localStorage.getItem('entrance'));
             data += amount;
 
             localStorage.setItem('entrance', JSON.stringify(data));
-            document.getElementById('totalEntrance').innerHTML = data;
+            document.getElementById('totalEntrance').innerText = data;
+
+            setTotal(amount, selected);
 
         }
 
     } else{
 
         if(localStorage.getItem('expense') === null){
-            data = 0;
 
-            localStorage.setItem('expense', JSON.stringify(data));
-            document.getElementById('totalExpense').innerHTML = '0.00';
+            localStorage.setItem('expense', JSON.stringify(amount));
+            document.getElementById('totalExpense').innerText = amount;
 
         } else{
             data = Number(localStorage.getItem('expense'));
             data += amount;
 
             localStorage.setItem('expense', JSON.stringify(data));
-            document.getElementById('totalExpense').innerHTML = data;
+            document.getElementById('totalExpense').innerText = data;
+
+            setTotal(amount, selected);
+
 
         }
     }
@@ -187,13 +184,14 @@ form.addEventListener('submit', e =>{
     if(description.value != '' && amount.value != ''){
         
         // Push to LocalStorage
-        pushLocalStorage(amount, selected)
+        pushLocalStorage(Number(amount.value), selected)
         
         // Draw List
         updateUI(description.value, amount.value, selected);
         
         // Compute total
-        setTotal(amount, selected);
+        setTotal(Number(amount.value), selected);
+
         description.value = "";
         amount.value = "";
     } 
