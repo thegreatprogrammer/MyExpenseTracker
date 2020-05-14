@@ -56,25 +56,38 @@ const updateUI = (desc, amount, category) =>{
 }
 
 // Delete the selectioned item
-const deleteItem = e =>{
-    if(e.parentElement.classList.contains('entrance')){
+const deleteItem = (e, category) =>{
 
-        let value = Number(e.previousSibling.previousSibling.childNodes[1].innerText);
-        entrance -= value;
-        total -= value;
-
-        document.getElementById('totalAmount').innerText = total;
-        document.getElementById('totalEntrance').innerText = entrance;
-    }
+    let data;
     
-    if(e.parentElement.classList.contains('expense')){
+    if(category === 'entrance'){
+        // Restando el monto de las entradas
+        data = localStorage.getItem('entrance');
+        data -= Number(e.previousElementSibling.childNodes[1].innerText);
+        localStorage.setItem('entrance', data);
 
-        let value = Number(e.previousSibling.previousSibling.childNodes[1].innerText);
-        expense -= value;
-        total += value;
+        // Imprimiendo el nuevo valor
+        document.getElementById('totalEntrance').innerText = data;
 
-        document.getElementById('totalAmount').innerText = total;
-        document.getElementById('totalExpense').innerText = expense;
+        // Restando el monto del total
+        data = Number(localStorage.getItem('total'));
+        data -= Number(e.previousElementSibling.childNodes[1].innerText);
+        localStorage.setItem('total', data);
+        document.getElementById('totalAmount').innerText = data;
+
+    }
+
+    if(category === 'expense'){
+        data = Number(localStorage.getItem('expense'));
+        data -= Number(e.previousElementSibling.childNodes[1].innerText);
+        localStorage.setItem('expense', data);
+        document.getElementById('totalExpense').innerText = data;
+
+        // Devolviendo el monto al total
+        data = Number(localStorage.getItem('total'));
+        data += Number(e.previousElementSibling.childNodes[1].innerText);
+        localStorage.setItem('total', data);
+        document.getElementById('totalAmount').innerText = data;
     }
 
     e.parentElement.remove();
@@ -229,10 +242,15 @@ form.addEventListener('submit', e =>{
 });
 
 list.addEventListener('click', e =>{
-    if(e.target.classList.contains('delete')){
+    if(e.target.classList.contains('delete') &&e.target.parentElement.classList.contains('entrance')){
 
-        deleteItem(e.target);
+        deleteItem(e.target, 'entrance');
 
-        // Delete in LocalStorage
+    }
+
+    if(e.target.classList.contains('delete') &&e.target.parentElement.classList.contains('expense')){
+
+        deleteItem(e.target, 'expense');
+
     }
 });
