@@ -97,35 +97,44 @@ const setTotal = (amount, selected) =>{
     let data;
 
     if(localStorage.getItem('total') === null){
+
         data = 0;
         localStorage.setItem('total', data);
-        document.getElementById('totalAmount').innerText = '0.00';
+
+    } 
+
+    if(localStorage.getItem('entrance') !== null){
+        document.getElementById('totalEntrance').innerText = Number(localStorage.getItem('entrance'));
+    }
+
+    if(localStorage.getItem('expense') !== null){
+        document.getElementById('totalExpense').innerText = Number(localStorage.getItem('expense'));
+    }
+    
+    // If amount exists...
+    if(amount){
+
+        if(selected === 'entrance'){
+            data = Number(localStorage.getItem('total'));
+            data += amount;
+
+            localStorage.setItem('total', JSON.stringify(data));
+            document.getElementById('totalAmount').innerText = data;
+
+        } else {
+            data = Number(localStorage.getItem('total'));
+            data -= amount;
+
+            localStorage.setItem('total', JSON.stringify(data));
+            document.getElementById('totalAmount').innerText = data;
+
+        }
 
     } else{
-
-        // If amount exists...
-        if(amount){
-
-            if(selected === 'entrance'){
-                data = Number(localStorage.getItem('total'));
-                data += amount;
-                console.log(data)
-                localStorage.setItem('total', JSON.stringify(data));
-                document.getElementById('totalAmount').innerText = data;
-
-            } else {
-                data = Number(localStorage.getItem('total'));
-                data -= amount;
-                localStorage.setItem('total', JSON.stringify(data));
-                document.getElementById('totalAmount').innerText = data;
-
-            }
-
-        } else{
-            document.getElementById('totalAmount').innerText = Number(localStorage.getItem('total'));
-        }
+        document.getElementById('totalAmount').innerText = Number(localStorage.getItem('total'));
     }
 }
+
 
 const pushLocalStorage = (amount, selected) =>{
 
@@ -137,6 +146,7 @@ const pushLocalStorage = (amount, selected) =>{
 
             localStorage.setItem('entrance', JSON.stringify(amount));
             document.getElementById('totalEntrance').innerText = amount;
+            setTotal(amount, selected);
 
         } else{
             data = Number(localStorage.getItem('entrance'));
@@ -155,6 +165,8 @@ const pushLocalStorage = (amount, selected) =>{
 
             localStorage.setItem('expense', JSON.stringify(amount));
             document.getElementById('totalExpense').innerText = amount;
+
+            setTotal(amount, selected);
 
         } else{
             data = Number(localStorage.getItem('expense'));
@@ -183,14 +195,28 @@ form.addEventListener('submit', e =>{
     
     if(description.value != '' && amount.value != ''){
         
-        // Push to LocalStorage
-        pushLocalStorage(Number(amount.value), selected)
-        
-        // Draw List
-        updateUI(description.value, amount.value, selected);
-        
-        // Compute total
-        setTotal(Number(amount.value), selected);
+        if(selected === 'expense'){
+
+            if(Number(localStorage.getItem('total')) > amount.value){
+                // Push to LocalStorage
+               pushLocalStorage(Number(amount.value), selected)
+               
+               // Draw List
+               updateUI(description.value, amount.value, selected);
+
+            } else{
+                buildMessage('Low budget!');
+            }
+
+        }
+
+        if(selected === 'entrance'){
+            // Push to LocalStorage
+            pushLocalStorage(Number(amount.value), selected)
+            
+            // Draw List
+            updateUI(description.value, amount.value, selected);
+        }
 
         description.value = "";
         amount.value = "";
