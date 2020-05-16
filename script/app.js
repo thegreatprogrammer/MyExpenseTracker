@@ -16,7 +16,6 @@ let total = 0;
 document.getElementById('totalEntrance').innerHTML = '0.00';
 document.getElementById('totalExpense').innerHTML = '0.00';
 
-
 category.value = '';
 
 //////////////////////////     FUNCTIONS    ////////////////////////////////
@@ -24,46 +23,90 @@ category.value = '';
 
 /////////////////////////    UI FUNCTIONS    ///////////////////////////////
 
+const showTransactions = () =>{
+
+    if(localStorage.getItem('transaction') === null){
+        // Array for transactions
+        let transaction = [];
+
+        // LocalStorage for transactions
+        localStorage.setItem('transaction', JSON.stringify(transaction));
+
+    }
+
+    let data = JSON.parse(localStorage.getItem('transaction'));
+
+    data.forEach( element => {
+        let item = `
+        <li class="item ${element.category}" id="${element.category}">
+            <div class="data">
+                <div>${element.description}</div> Total: +<span id="ent">${element.amount}</span>
+            </div>
+            <span class="delete">x</span>
+        </li>
+        `
+        list.innerHTML += item;
+    });
+}
+
 // Add item to UI
 const updateUI = (desc, amount, category) =>{
 
-    let object;
+    let object, data;
 
     if(category === 'entrance'){
         let item = `
         <li class="item entrance" id="entrance">
             <div class="data">
-                ${desc}. Total: +<span id="ent">${amount}</span>
+                <div>${desc}</div> Total: +<span id="ent">${amount}</span>
             </div>
             <span class="delete">x</span>
         </li>
         `
         list.innerHTML += item;
+        
+        object = {
+            description: desc,
+            amount: amount,
+            category: 'entrance'
+        }
 
     } else{
         let item = `
         <li class="item expense" id="expense">
             <div class="data">
-                ${desc}. Total: -<span id="exp">${amount}</span>
+                <div>${desc}</div> Total: -<span id="exp">${amount}</span>
             </div>
             <span class="delete">x</span>
         </li>
         `
         list.innerHTML += item;
 
+        object = {
+            description: desc,
+            amount: amount,
+            category: 'expense'
+        };
+
     }
+
+    // Saving the new transaction object in the array and push to Local Storage
+    data = JSON.parse(localStorage.getItem('transaction'));
+    data.push(object);
+
+    localStorage.setItem('transaction', JSON.stringify(data));
 
 }
 
 // Delete the selectioned item
-const deleteItem = (e, category) =>{
+const deleteItem = (e, category, description) =>{
 
     let data;
     
     if(category === 'entrance'){
         // Restando el monto de las entradas
         data = localStorage.getItem('entrance');
-        data -= Number(e.previousElementSibling.childNodes[1].innerText);
+        data -= Number(e.parentElement.childNodes[1].childNodes[3].innerText);
         localStorage.setItem('entrance', data);
 
         // Imprimiendo el nuevo valor
@@ -71,26 +114,40 @@ const deleteItem = (e, category) =>{
 
         // Restando el monto del total
         data = Number(localStorage.getItem('total'));
-        data -= Number(e.previousElementSibling.childNodes[1].innerText);
+        data -= Number(e.parentElement.childNodes[1].childNodes[3].innerText);
+
         localStorage.setItem('total', data);
+        
         document.getElementById('totalAmount').innerText = data;
 
     }
 
     if(category === 'expense'){
+        // Restando el monto de los gastos
         data = Number(localStorage.getItem('expense'));
-        data -= Number(e.previousElementSibling.childNodes[1].innerText);
+        data -= Number(e.parentElement.childNodes[1].childNodes[3].innerText);
         localStorage.setItem('expense', data);
+
+        // Imprimiendo el nuevo valor
         document.getElementById('totalExpense').innerText = data;
 
         // Devolviendo el monto al total
         data = Number(localStorage.getItem('total'));
-        data += Number(e.previousElementSibling.childNodes[1].innerText);
+        data += Number(e.parentElement.childNodes[1].childNodes[3].innerText);
         localStorage.setItem('total', data);
+        
         document.getElementById('totalAmount').innerText = data;
     }
 
     e.parentElement.remove();
+
+    let trans = JSON.parse(localStorage.getItem('transaction'));
+
+    let index = trans.findIndex(element => element.description === description);
+
+    trans.splice(index, 1);
+
+    localStorage.setItem('transaction', JSON.stringify(trans));
 }
 
 
@@ -199,6 +256,7 @@ const pushLocalStorage = (amount, selected) =>{
 
 document.addEventListener('DOMContentLoaded', e =>{
     setTotal();
+    showTransactions();
 })
 
 form.addEventListener('submit', e =>{
@@ -233,6 +291,7 @@ form.addEventListener('submit', e =>{
 
         description.value = "";
         amount.value = "";
+
     } 
         
     else{
@@ -242,15 +301,20 @@ form.addEventListener('submit', e =>{
 });
 
 list.addEventListener('click', e =>{
-    if(e.target.classList.contains('delete') &&e.target.parentElement.classList.contains('entrance')){
 
-        deleteItem(e.target, 'entrance');
+    let description;
+
+    if(e.target.classList.contains('delete') && e.target.parentElement.classList.contains('entrance')){
+
+        description = e.target.previousElementSibling.childNodes[1].innerText;
+        deleteItem(e.target, 'entrance', description);
 
     }
 
-    if(e.target.classList.contains('delete') &&e.target.parentElement.classList.contains('expense')){
+    if(e.target.classList.contains('delete') && e.target.parentElement.classList.contains('expense')){
 
-        deleteItem(e.target, 'expense');
+        description = e.target.previousElementSibling.childNodes[1].innerText;
+        deleteItem(e.target, 'expense', description);
 
     }
 });
